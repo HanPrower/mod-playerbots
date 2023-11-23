@@ -263,7 +263,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool /*minimal*/)
         if (time(nullptr) > (PlayersCheckTimer + 60))
             activateCheckPlayersThread();
     }
-    
+
     if (sPlayerbotAIConfig->randomBotJoinBG/* && !players.empty()*/)
     {
         if (time(nullptr) > (BgCheckTimer + 30))
@@ -1032,7 +1032,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation>&
             Map* map = sMapMgr->FindMap(loc.GetMapId(), 0);
             if (!map)
                 continue;
-            
+
             AreaTableEntry const* zone = sAreaTableStore.LookupEntry(map->GetZoneId(bot->GetPhaseMask(), x, y, z));
             if (!zone)
                 continue;
@@ -1147,7 +1147,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         } while (results->NextRow());
     }
     LOG_INFO("playerbots", "{} locations for level collected.", collected_locs);
-    
+
     results = WorldDatabase.Query(
     "SELECT "
 		    "map, "
@@ -1353,7 +1353,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
         maxLevel = std::max(sPlayerbotAIConfig->randomBotMinLevel, std::min(playersLevel, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)));
 
 	PerformanceMonitorOperation* pmo = sPerformanceMonitor->start(PERF_MON_RNDBOT, "RandomizeFirst");
-    
+
     uint32 level;
 
     if (sPlayerbotAIConfig->downgradeMaxLevelBot && bot->GetLevel() == sPlayerbotAIConfig->randomBotMaxLevel) {
@@ -1372,8 +1372,8 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
     }
 
     if (sPlayerbotAIConfig->disableRandomLevels) {
-        level = bot->getClass() == CLASS_DEATH_KNIGHT ? 
-            std::max(sPlayerbotAIConfig->randombotStartingLevel, sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_LEVEL)) : 
+        level = bot->getClass() == CLASS_DEATH_KNIGHT ?
+            std::max(sPlayerbotAIConfig->randombotStartingLevel, sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_LEVEL)) :
             sPlayerbotAIConfig->randombotStartingLevel;
     }
 
@@ -1410,7 +1410,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
 void RandomPlayerbotMgr::RandomizeMin(Player* bot)
 {
 	PerformanceMonitorOperation* pmo = sPerformanceMonitor->start(PERF_MON_RNDBOT, "RandomizeMin");
-    
+
     uint32 level = sPlayerbotAIConfig->randomBotMinLevel;
 
     SetValue(bot, "level", level);
@@ -1512,8 +1512,10 @@ void RandomPlayerbotMgr::Refresh(Player* bot)
     if (bot->GetMaxPower(POWER_ENERGY) > 0)
         bot->SetPower(POWER_ENERGY, bot->GetMaxPower(POWER_ENERGY));
 
-    uint32 money = bot->GetMoney();
-    bot->SetMoney(money + 500 * sqrt(urand(1, bot->getLevel() * 5)));
+    if (bot->getLevel() > 1) {
+        uint32 money = bot->GetMoney();
+        bot->SetMoney(money + 500 * sqrt(urand(1, bot->getLevel() * 5)));
+    }
 
     if (bot->GetGroup())
         bot->RemoveFromGroup();
